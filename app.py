@@ -2,7 +2,7 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 import time
 
-st.title("🎬 English to Spanish Subtitle Translator")
+st.title(" English to Spanish Translator")
 
 uploaded_file = st.file_uploader("Upload subtitle file (.srt, .vtt, .txt, .docx)", type=["txt", "srt", "vtt", "docx"])
 
