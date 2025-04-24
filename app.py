@@ -1,6 +1,5 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
-from docx import Document
 import time
 
 st.title("🎬 English to Spanish Subtitle Translator")
