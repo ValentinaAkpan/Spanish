@@ -4,7 +4,7 @@ import time
 
 st.title(" English to Spanish Translator")
 
-uploaded_file = st.file_uploader("Upload subtitle file (.srt, .vtt, .txt, .docx)", type=["txt", "srt", "vtt", "docx"])
+uploaded_file = st.file_uploader("Upload subtitle file (.srt, .vtt, .txt)", type=["txt", "srt", "vtt"])
 
 def extract_lines_from_docx(file):
     doc = Document(file)
