@@ -1,32 +1,26 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
-from docx import Document
 import time
 
 st.title("🎬 English to Spanish Subtitle Translator")
 
-uploaded_file = st.file_uploader("Upload subtitle file (.srt, .vtt, .txt, .docx)", type=["txt", "srt", "vtt", "docx"])
+# Allow .txt, .srt, .vtt files (subtitle formats)
+uploaded_file = st.file_uploader(
+    "Upload subtitle file (.txt, .srt, .vtt)", 
+    type=["txt", "srt", "vtt"]
+)
 
-def extract_lines_from_docx(file):
-    doc = Document(file)
-    return [para.text for para in doc.paragraphs if para.text.strip() != ""]
+# Initialize session state to store translation
+if "translated_result" not in st.session_state:
+    st.session_state.translated_result = None
 
-def is_non_translatable(line):
-    return (
-        line.strip() == "" or
-        "-->" in line or
-        line.strip().isdigit() or
-        line.strip().upper() == "WEBVTT"
-    )
+# Translation logic
+if uploaded_file and st.session_state.translated_result is None:
+    file_type = uploaded_file.name.split('.')[-1].lower()
 
-if uploaded_file:
-    file_extension = uploaded_file.name.split(".")[-1].lower()
-
-    if file_extension == "docx":
-        lines = extract_lines_from_docx(uploaded_file)
-    else:
-        content = uploaded_file.read().decode("utf-8")
-        lines = content.strip().splitlines()
+    # Read file content based on extension
+    content = uploaded_file.read().decode("utf-8", errors="ignore")
+    lines = content.strip().splitlines()
 
     translator = GoogleTranslator(source='en', target='es')
     translated_lines = []
@@ -38,7 +32,7 @@ if uploaded_file:
     total_lines = len(lines)
     for i, line in enumerate(lines):
         try:
-            if is_non_translatable(line):
+            if line.strip() == "" or "-->" in line or line.strip().isdigit() or line.strip().upper() == "WEBVTT":
                 translated_lines.append(line)
             else:
                 translated_text = translator.translate(line)
@@ -52,18 +46,19 @@ if uploaded_file:
             translated_lines.append(f"[Error translating] {line}")
             status_text.text(f"❌ Error at line {i + 1}: {e}")
 
-        time.sleep(0.05)  # Optional slowdown for visible progress
+        time.sleep(0.05)  # Optional slowdown
 
+    st.session_state.translated_result = "\n".join(translated_lines)
     st.success("✅ Translation complete!")
 
-    translated_result = "\n".join(translated_lines)
-
+# Display and download
+if st.session_state.translated_result:
     st.download_button(
         label="📥 Download Translated Subtitles",
-        data=translated_result,
+        data=st.session_state.translated_result,
         file_name="translated_subtitles_es.txt",
         mime="text/plain"
     )
 
     st.subheader("📄 Preview (First 20 Lines):")
-    st.text("\n".join(translated_lines[:20]))
+    st.text("\n".join(st.session_state.translated_result.splitlines()[:20]))
